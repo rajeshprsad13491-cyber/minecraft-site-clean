@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CraftHub | Minecraft Mods</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen font-sans">
+  <header class="border-b border-gray-800 bg-gray-900/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <span class="text-2xl font-black text-emerald-400">CraftHub</span>
+      <input id="searchInput" type="text" placeholder="Search mods..." class="bg-gray-800 border border-gray-700 px-4 py-1.5 rounded-lg text-sm focus:outline-none focus:border-emerald-400 w-64 text-white" />
+    </div>
+  </header>
+  <main class="max-w-6xl mx-auto px-4 py-8">
+    <h1 class="text-xl font-bold mb-6">Popular Downloads</h1>
+    <div id="modList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+  </main>
+  <script>
+    let allMods = [];
+    async function loadMods() {
+      const res = await fetch('/api/mods');
+      allMods = await res.json();
+      renderMods(allMods);
+    }
+    function renderMods(mods) {
+      document.getElementById('modList').innerHTML = mods.map(mod => `
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <h2 class="text-lg font-bold text-white">${mod.name}</h2>
+              <span class="text-xs px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">${mod.loader}</span>
+            </div>
+            <p class="text-sm text-gray-400 mb-4">${mod.description}</p>
+          </div>
+          <div>
+            <div class="flex items-center justify-between text-xs text-gray-500 mb-3">
+              <span>MC ${mod.version}</span>
+              <span>${mod.downloads} downloads</span>
+            </div>
+            <a href="/api/download/${mod.id}" target="_blank" class="block w-full text-center bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-semibold py-2 rounded-lg text-sm transition">Download</a>
+          </div>
+        </div>
+      `).join('');
+    }
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      renderMods(allMods.filter(m => m.name.toLowerCase().includes(query) || m.description.toLowerCase().includes(query)));
+    });
+    loadMods();
+  </script>
+</body>
+</html>
